@@ -74,23 +74,6 @@ describe('Authentication', () => {
         })
     })
 
-    it('Validate short mobile number', done => {
-      let payload = {
-        mobileNumber: '987654',
-        password: 'RandomPass123!'
-      }
-      chai
-        .request(server)
-        .post('/login')
-        .send(payload)
-        .end((err, res) => {
-          res.should.have.status(400)
-          res.body.should.be.a('object')
-          res.body.should.have.property('message').eql('Invalid Input')
-          done()
-        })
-    })
-
     it('Validate login success', done => {
       ;(async () => {
         let newUser = new User({
@@ -119,5 +102,33 @@ describe('Authentication', () => {
     })
   })
 
-  describe('/POST Signup', () => {})
+  describe('/POST Signup', () => {
+    it('Check if user exists already', done => {
+      ;(async () => {
+        let newUser = new User({
+          name: 'Leo',
+          password: 'RandomPass123!',
+          mobileNumber: '1234567890',
+          isActive: true
+        })
+        newUser = await newUser.save()
+
+        let payload = {
+          mobileNumber: '1234567890',
+          password: 'RandomPass123!',
+          name: 'Leo'
+        }
+        chai
+          .request(server)
+          .post('/signup')
+          .send(payload)
+          .end((err, res) => {
+            res.should.have.status(200)
+            res.body.should.be.a('object')
+            expect(res.body).to.nested.include({ 'data.success': false })
+            done()
+          })
+      })()
+    })
+  })
 })
