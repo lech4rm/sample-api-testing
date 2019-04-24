@@ -1,8 +1,8 @@
-let User = require('../components/user/user.model')
-let chai = require('chai')
-let chaiHttp = require('chai-http')
-let should = chai.should()
-let { expect } = chai
+const User = require('../components/user/user.model')
+const chai = require('chai')
+const chaiHttp = require('chai-http')
+const should = chai.should()
+const { expect } = chai
 chai.use(chaiHttp)
 
 describe('Authentication', () => {
@@ -105,6 +105,7 @@ describe('Authentication', () => {
   describe('/POST Signup', () => {
     it('Check if user exists already', done => {
       ;(async () => {
+        /* Manually insert a user prior signup to satify this case */
         let newUser = new User({
           name: 'Leo',
           password: 'RandomPass123!',
@@ -130,5 +131,25 @@ describe('Authentication', () => {
           })
       })()
     })
+  })
+
+  it('Check if a user is being created', done => {
+    ;(async () => {
+      let payload = {
+        mobileNumber: '5432109876',
+        password: 'RandomPass123!',
+        name: 'Leo'
+      }
+      chai
+        .request(server)
+        .post('/signup')
+        .send(payload)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.a('object')
+          expect(res.body).to.nested.include({ 'data.success': true })
+          done()
+        })
+    })()
   })
 })

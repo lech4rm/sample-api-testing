@@ -44,7 +44,6 @@ function validators() {
         })
           .exec()
           .then(user => {
-            console.log(user)
             user ? resolve(user) : resolve(false)
           })
           .catch(reject)
